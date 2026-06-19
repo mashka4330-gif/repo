@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { margin: 0; background: #1a1a1a; }
+#status { color: #aaa; padding: 12px 20px; font: 14px sans-serif; }
+#pages { display: flex; flex-direction: column; gap: 16px; padding: 20px; align-items: center; }
+canvas { max-width: 100%; display: block; }
+</style>
+</head>
+<body>
+<div id="status">Загрузка...</div>
+<div id="pages"></div>
+<script>
+// Use legacy build with fake worker
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>
+var pdfjsLib = window['pdfjs-dist/build/pdf'];
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+(async function() {
+  const status = document.getElementById('status');
+  const pages  = document.getElementById('pages');
+  try {
+    const loadingTask = pdfjsLib.getDocument({ url: 'presentation.pdf', disableWorker: false });
+    const pdf = await loadingTask.promise;
+    status.textContent = 'Страниц: ' + pdf.numPages;
+
+    const scale = 1.2;
+    for (let p = 1; p <= Math.min(pdf.numPages, 40); p++) {
+      const page = await pdf.getPage(p);
+      const vp   = page.getViewport({ scale });
+      const canvas = document.createElement('canvas');
+      canvas.width  = vp.width;
+      canvas.height = vp.height;
+      pages.appendChild(canvas);
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+      status.textContent = 'Рендер страницы ' + p + ' / ' + pdf.numPages;
+    }
+    status.textContent = '✓ Готово';
+  } catch(e) {
+    status.textContent = 'Ошибка: ' + e.message;
+    console.error(e);
+  }
+})();
+</script>
+</body>
+</html>
