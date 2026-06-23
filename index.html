@@ -855,12 +855,12 @@ footer{background:#141210;border-top:1px solid rgba(255,255,255,.05);padding:3re
         <div class="pmeta">3 этажа · Санкт-Петербург</div>
       </div>
     </div>
-    <div class="pcard pb" data-cat="коммерческие">
-      <div class="pthumb bg2"></div>
+    <div class="pcard pb" data-cat="жилые" onclick="openGal('piter2')">
+      <div class="pthumb" style="background-image:url('uploads/piter2/bedroom1.jpg')"></div>
       <div class="pinfo">
-        <div class="ptag">Коммерческий · 1&nbsp;200&nbsp;м²</div>
-        <div class="pname">Офис ХМЗ</div>
-        <div class="pmeta">Ремонт и дизайн · Красноярск</div>
+        <div class="ptag">Жилой · 48,7&nbsp;м²</div>
+        <div class="pname">ЖК «Созидатели»</div>
+        <div class="pmeta">Квартира · Санкт-Петербург</div>
       </div>
     </div>
     <div class="pcard pc" data-cat="жилые">
@@ -1280,6 +1280,17 @@ document.querySelectorAll('.ptab').forEach(b => b.addEventListener('click', func
 }));
 
 const galImages = {
+  piter2: [
+    'uploads/piter2/bedroom1.jpg',
+    'uploads/piter2/bedroom3.jpg',
+    'uploads/piter2/bedroom61.jpg',
+    'uploads/piter2/shower1.jpg',
+    'uploads/piter2/shower3.jpg',
+    'uploads/piter2/2.jpg',
+    'uploads/piter2/4.jpg',
+    'uploads/piter2/6.jpg',
+    'uploads/piter2/7.jpg',
+  ],
   piter: [
     'uploads/piter/living1.jpg',
     'uploads/piter/living2.jpg',
