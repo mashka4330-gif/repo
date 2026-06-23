@@ -265,6 +265,34 @@ section{padding:7rem 3rem}
 .bg4{background:linear-gradient(145deg,#262420,#343230,#1e1c1a,#302e2a)}
 .bg5{background:linear-gradient(145deg,#48606e,#36505e,#58707e,#3e5868)}
 
+/* gallery lightbox */
+.gal-wrap{
+  position:fixed;inset:0;z-index:400;
+  background:rgba(8,6,4,.95);backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;
+}
+.gal-wrap.open{display:flex}
+.gal-inner{position:relative;max-width:90vw;max-height:90vh;display:flex;align-items:center;gap:1rem}
+.gal-img-wrap{position:relative}
+.gal-img-wrap img{max-width:80vw;max-height:85vh;object-fit:contain;display:block;border-radius:2px}
+.gal-btn{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.7);font-size:20px;width:44px;height:44px;
+  border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .2s;flex-shrink:0;
+}
+.gal-btn:hover{background:rgba(255,255,255,.18);color:#fff}
+.gal-close{
+  position:absolute;top:-2.8rem;right:0;background:none;border:none;
+  color:rgba(255,255,255,.5);font-size:26px;cursor:pointer;line-height:1;transition:color .2s;
+}
+.gal-close:hover{color:#fff}
+.gal-counter{
+  position:absolute;bottom:-2rem;left:0;right:0;text-align:center;
+  font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);
+}
+.pcard.hidden{display:none}
+
 .port-more{text-align:center;margin-top:2.8rem}
 .btn-ghost{
   border:1px solid rgba(28,28,27,.2);color:var(--ink);
@@ -819,15 +847,15 @@ footer{background:#141210;border-top:1px solid rgba(255,255,255,.05);padding:3re
     <div class="port-ca tl"></div>
     <div class="port-ca br"></div>
   <div class="port-mosaic">
-    <div class="pcard pa">
-      <div class="pthumb bg1"></div>
+    <div class="pcard pa" data-cat="жилые" onclick="openGal('piter')">
+      <div class="pthumb" style="background-image:url('uploads/piter/Гостиная_1.jpg');background-size:cover;background-position:center"></div>
       <div class="pinfo">
-        <div class="ptag">Жилой · 78&nbsp;м²</div>
-        <div class="pname">ЖК «Скандис Планета»</div>
-        <div class="pmeta">3-комнатная · Красноярск</div>
+        <div class="ptag">Жилой · 140&nbsp;м²</div>
+        <div class="pname">Таунхаус, Всеволожск</div>
+        <div class="pmeta">3 этажа · Санкт-Петербург</div>
       </div>
     </div>
-    <div class="pcard pb">
+    <div class="pcard pb" data-cat="коммерческие">
       <div class="pthumb bg2"></div>
       <div class="pinfo">
         <div class="ptag">Коммерческий · 1&nbsp;200&nbsp;м²</div>
@@ -835,7 +863,7 @@ footer{background:#141210;border-top:1px solid rgba(255,255,255,.05);padding:3re
         <div class="pmeta">Ремонт и дизайн · Красноярск</div>
       </div>
     </div>
-    <div class="pcard pc">
+    <div class="pcard pc" data-cat="жилые">
       <div class="pthumb bg3"></div>
       <div class="pinfo">
         <div class="ptag">Жилой · 52&nbsp;м²</div>
@@ -843,7 +871,7 @@ footer{background:#141210;border-top:1px solid rgba(255,255,255,.05);padding:3re
         <div class="pmeta">Квартира · Новосибирск</div>
       </div>
     </div>
-    <div class="pcard pd">
+    <div class="pcard pd" data-cat="жилые">
       <div class="pthumb bg4"></div>
       <div class="pinfo">
         <div class="ptag">Жилой · 110&nbsp;м²</div>
@@ -851,7 +879,7 @@ footer{background:#141210;border-top:1px solid rgba(255,255,255,.05);padding:3re
         <div class="pmeta">Дизайн-проект · Москва</div>
       </div>
     </div>
-    <div class="pcard pe">
+    <div class="pcard pe" data-cat="коммерческие">
       <div class="pthumb bg5"></div>
       <div class="pinfo">
         <div class="ptag">Коммерческий · 400&nbsp;м²</div>
@@ -1048,6 +1076,19 @@ footer{background:#141210;border-top:1px solid rgba(255,255,255,.05);padding:3re
   </div>
 </section>
 
+<!-- gallery lightbox для проектов -->
+<div class="gal-wrap" id="galModal" onclick="galBgClose(event)">
+  <div class="gal-inner">
+    <button class="gal-btn" id="galPrev" onclick="galStep(-1)">&#8592;</button>
+    <div class="gal-img-wrap">
+      <button class="gal-close" onclick="closeGal()">×</button>
+      <img id="galImg" src="" alt="">
+      <div class="gal-counter" id="galCounter"></div>
+    </div>
+    <button class="gal-btn" id="galNext" onclick="galStep(1)">&#8594;</button>
+  </div>
+</div>
+
 <!-- lightbox для документов -->
 <div class="lb-wrap" id="lb" onclick="lbClose(event)">
   <div class="lb-inner">
@@ -1231,7 +1272,55 @@ window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY
 document.querySelectorAll('.ptab').forEach(b => b.addEventListener('click', function(){
   document.querySelectorAll('.ptab').forEach(x => x.classList.remove('on'));
   this.classList.add('on');
+  const label = this.textContent.trim().toLowerCase();
+  document.querySelectorAll('.pcard').forEach(card => {
+    if(label === 'все') card.classList.remove('hidden');
+    else card.classList.toggle('hidden', card.dataset.cat !== label);
+  });
 }));
+
+const galImages = {
+  piter: [
+    'uploads/piter/Гостиная_1.jpg',
+    'uploads/piter/Гостиная_4.jpg',
+    'uploads/piter/Гостиная_5_1.jpg',
+    'uploads/piter/Холл_5.jpg',
+    'uploads/piter/Холл_6.1.jpg',
+    'uploads/piter/Спальня_3.jpg',
+    'uploads/piter/Спальня_5.jpg',
+    'uploads/piter/Ванная_1.jpg',
+    'uploads/piter/Ванная_4_1.jpg',
+    'uploads/piter/Кабинет_6.jpg',
+    'uploads/piter/1__этаж_1.jpg',
+  ]
+};
+let galCurrent = 0, galList = [];
+function openGal(key){
+  galList = galImages[key] || [];
+  galCurrent = 0;
+  galRender();
+  document.getElementById('galModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeGal(){
+  document.getElementById('galModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function galRender(){
+  document.getElementById('galImg').src = galList[galCurrent];
+  document.getElementById('galCounter').textContent = (galCurrent+1) + ' / ' + galList.length;
+}
+function galStep(dir){
+  galCurrent = (galCurrent + dir + galList.length) % galList.length;
+  galRender();
+}
+function galBgClose(e){ if(e.target===document.getElementById('galModal')) closeGal(); }
+document.addEventListener('keydown', e => {
+  if(!document.getElementById('galModal').classList.contains('open')) return;
+  if(e.key==='ArrowRight') galStep(1);
+  if(e.key==='ArrowLeft') galStep(-1);
+  if(e.key==='Escape') closeGal();
+});
 
 function openModal(){ document.getElementById('modal').classList.add('open'); document.body.style.overflow='hidden'; }
 function closeModal(){ document.getElementById('modal').classList.remove('open'); document.body.style.overflow=''; }
